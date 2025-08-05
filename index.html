@@ -7,38 +7,31 @@
     <h1>Global Auto Market Share</h1>
     <p>Market share trends 2020-2024</p>
 
-    <div class="navigation">
-        <button id="prev-btn" disabled>Previous</button>
-        <div class="scene-indicators">
-            <div class="indicator active" data-scene="0">
-                <span class="indicator-label">Today</span>
-            </div>
-            <div class="indicator" data-scene="1">
-                <span class="indicator-label">Journey</span>
-            </div>
+    <button id="prev-btn" disabled>Previous</button>
+    <div class="scene-indicators">
+        <div class="indicator active" data-scene="0">
+            <span class="indicator-label">Today</span>
         </div>
-        <button id="next-btn">Next</button>
+        <div class="indicator" data-scene="1">
+            <span class="indicator-label">Journey</span>
+        </div>
+        <div class="indicator" data-scene="2">
+            <span class="indicator-label">Changes</span>
+        </div>
     </div>
+    <button id="next-btn">Next</button>
 
-    <div id="scene-header">
-        <h2 id="scene-title">Today's Market Leaders</h2>
-        <p id="scene-description">Current global auto market share in 2024</p>
-    </div>
+    <h2 id="scene-title"></h2>
+    <p id="scene-description"></p>
 
     <svg id="main-chart" width="900" height="600"></svg>
 
-    <div id="insights-box">
-        <h3>Key Insight</h3>
-        <p id="key-insight"></p>
-    </div>
+    <p id="key-insight"></p>
 
-    <div class="progress-section">
-        <div class="progress-bar">
-            <div class="progress-fill" style="width: 50%"></div>
-        </div>
-        <p class="progress-text"></p>
-        <p id="interaction-hint"></p>
+    <div class="progress-bar">
+        <div class="progress-fill"></div>
     </div>
+    <p class="progress-text"></p>
 
     <script src="d3.js"></script>
 </body>

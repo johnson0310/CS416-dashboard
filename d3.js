@@ -48,6 +48,9 @@ const carMarketData = {
         },
         scene2: {
             text: "The auto industry has gone through COVID 19 impacts, supply chain issues, and the EV movements. The top 5 global automakers show varying recoveries post pandemic."
+        },
+        scene3: {
+            text: "From 2020 to 2024, Ford lost the most market share at -1.5%, while Toyota at -1.3% and Volkswagen Group at -1.3% also declined. GM at -1.0% and Hyundai-Kia at -0.3%."
         }
     }
 };
@@ -69,17 +72,14 @@ function getYearData(year){
 function initializeStyles() {
     const style = document.createElement('style');
     style.textContent = `
-        body { font-family: Arial, sans-serif; margin: 10px; text-align: center; }
-        h1, h2, h3, p { text-align: center; }
-        .navigation { text-align: center; margin: 20px 0; }
-        .indicator { display: inline-block; width: 80px; height: 60px; background: lightgray; margin: 2px; text-align: center; border: 1px solid black; padding: 5px; }
+        body { font-family: Arial, sans-serif; margin: 20px; text-align: center; }
+        button { margin: 10px; }
+        .indicator { display: inline-block; width: 80px; height: 60px; background: lightgray; margin: 5px; text-align: center; border: 1px solid black; padding: 5px; }
         .indicator.active { background: black; color: white; }
         .indicator-label { display: block; font-size: 12px; }
-        #scene-header { text-align: center; margin: 20px 0; }
         svg { display: block; margin: 20px auto; }
-        #insights-box { text-align: center; margin: 20px auto; max-width: 600px; }
-        .progress-section { text-align: center; margin: 20px 0; }
-        .progress-bar { width: 200px; height: 10px; background: lightgray; margin: 10px auto; }
+        #key-insight { margin: 20px auto; max-width: 600px; }
+        .progress-bar { width: 200px; height: 10px; background: lightgray; margin: 20px auto; }
         .progress-fill { height: 100%; background: black; }
     `;
     document.head.appendChild(style);
@@ -95,20 +95,20 @@ let currentScene = 0;
 const scene = {
     0: {
         title: "Today's top 5 market leaders",
-        description: 'Current global auto market share in 2024',
-        type: 'Bar',
-        sceneDescription: 'Bar chart showing market share'
+        description: 'Current global auto market share in 2024'
     },
     1: {
         title: "The historical market share trend",
-        description: 'The auto market share trend through the last few years (2020-2024)',
-        type: 'Line',
-        sceneDescription: 'Line chart showing trend over time'
+        description: 'The auto market share trend through the last few years (2020-2024)'
+    },
+    2: {
+        title: "Market share changes over 4 years",
+        description: 'Market share changes from 2020 to 2024'
     }
 }
 
 function init() {
-    // Initialize D3 elements
+    // initialize d3 elements
     svg = d3.select("#main-chart");
     g = svg.append("g")
         .attr("transform", `translate(${margin},${margin})`);
@@ -134,7 +134,7 @@ function setupEventListeners() {
     });
 
     nextBtn.on("click", function() {
-        if (currentScene < 1) {
+        if (currentScene < 2) {
             currentScene++;
             updateSceneUI();
             renderScene(currentScene);
@@ -155,12 +155,11 @@ function updateSceneUI() {
 
     d3.select("#scene-title").text(config.title);
     d3.select("#scene-description").text(config.description);
-    d3.select("#interaction-hint").text(config.sceneDescription);
 
     // progress bar
-    const progress = ((currentScene + 1) / 2) * 100;
+    const progress = ((currentScene + 1) / 3) * 100;
     d3.select(".progress-fill").style("width", `${progress}%`);
-    d3.select(".progress-text").text(`Scene ${currentScene + 1} of 2`);
+    d3.select(".progress-text").text(`Scene ${currentScene + 1} of 3`);
 
     d3.selectAll(".indicator")
         .classed("active", false);
@@ -176,7 +175,7 @@ function updateSceneUI() {
         prevBtn.property("disabled", false);
     }
 
-    if (currentScene === 1) {
+    if (currentScene === 2) {
         nextBtn.property("disabled", true);
     } else {
         nextBtn.property("disabled", false);
@@ -191,7 +190,7 @@ function updateSceneUI() {
 
 function renderScene(sceneIndex) {
     try {
-        // Clear previous scene
+        // clear previous scene
         if (g) {
             g.selectAll("*").remove();
         }
@@ -203,11 +202,13 @@ function renderScene(sceneIndex) {
             case 1:
                 scene2();
                 break;
+            case 2:
+                scene3();
+                break;
             default:
                 break;
         }
     } catch (error) {
-        // Silent error handling
     }
 }
 
@@ -238,7 +239,6 @@ function scene1() {
         .domain([0, maxShare + 2])
         .range([height, 0]);
 
-    // Bars
     bars = g.selectAll(".bar")
         .data(data)
         .enter().append("rect")
@@ -249,7 +249,6 @@ function scene1() {
         .attr("height", function(d) { return height - yScale(d.share); })
         .attr("fill", function(d) { return d.color; });
 
-    // Value labels on bars
     g.selectAll(".value-label")
         .data(data)
         .enter().append("text")
@@ -259,7 +258,6 @@ function scene1() {
         .attr("text-anchor", "middle")
         .text(function(d) { return d.share + "%"; });
 
-    // Axes
     g.append("g")
         .attr("class", "x-axis")
         .attr("transform", `translate(0,${height})`)
@@ -387,6 +385,113 @@ function scene2() {
         .text("Market Share (%)");
 }
 
+// scene 3
+function scene3() {
+    const data2020 = getYearData(2020);
+    const data2024 = getYearData(2024);
+
+    const changeData = [];
+    for (let i = 0; i < data2024.length; i++) {
+        const brand2024 = data2024[i];
+        let share2020 = 0;
+        for (let j = 0; j < data2020.length; j++) {
+            if (data2020[j].brand === brand2024.brand) {
+                share2020 = data2020[j].share;
+                break;
+            }
+        }
+        const change = brand2024.share - share2020;
+        changeData.push({
+            brand: brand2024.brand,
+            change: change,
+            color: change >= 0 ? "green" : "red"
+        });
+    }
+
+    changeData.sort(function(a, b) { return a.change - b.change; });
+
+    const brandNames = [];
+    for (let i = 0; i < changeData.length; i++) {
+        brandNames.push(changeData[i].brand);
+    }
+
+    const yScale = d3.scaleBand()
+        .domain(brandNames)
+        .range([0, height])
+        .padding(0.2);
+
+    let maxAbsChange = 0;
+    for (let i = 0; i < changeData.length; i++) {
+        const absChange = Math.abs(changeData[i].change);
+        if (absChange > maxAbsChange) {
+            maxAbsChange = absChange;
+        }
+    }
+
+    const xScale = d3.scaleLinear()
+        .domain([-maxAbsChange - 0.5, maxAbsChange + 0.5])
+        .range([0, width]);
+
+    const centerX = xScale(0);
+
+    g.selectAll(".change-bar")
+        .data(changeData)
+        .enter().append("rect")
+        .attr("class", "change-bar")
+        .attr("x", function(d) {
+            return d.change >= 0 ? centerX : xScale(d.change);
+        })
+        .attr("y", function(d) { return yScale(d.brand); })
+        .attr("width", function(d) {
+            return Math.abs(xScale(d.change) - centerX);
+        })
+        .attr("height", yScale.bandwidth())
+        .attr("fill", function(d) { return d.color; });
+
+    g.selectAll(".change-label")
+        .data(changeData)
+        .enter().append("text")
+        .attr("class", "change-label")
+        .attr("x", function(d) {
+            return d.change >= 0 ? xScale(d.change) + 5 : xScale(d.change) - 5;
+        })
+        .attr("y", function(d) { return yScale(d.brand) + yScale.bandwidth() / 2; })
+        .attr("dy", "0.35em")
+        .attr("text-anchor", function(d) { return d.change >= 0 ? "start" : "end"; })
+        .text(function(d) { return (d.change >= 0 ? "+" : "") + d.change.toFixed(1) + "%"; });
+
+    // center line on x axis for 0
+    g.append("line")
+        .attr("x1", centerX)
+        .attr("x2", centerX)
+        .attr("y1", 0)
+        .attr("y2", height)
+        .attr("stroke", "black")
+        .attr("stroke-width", 1);
+
+    g.append("g")
+        .attr("class", "y-axis")
+        .call(d3.axisLeft(yScale));
+
+    g.append("g")
+        .attr("class", "x-axis")
+        .attr("transform", `translate(0,${height})`)
+        .call(d3.axisBottom(xScale));
+
+    g.append("text")
+        .attr("transform", `translate(${width / 2}, ${height + 40})`)
+        .style("text-anchor", "middle")
+        .text("Market Share Change (%)");
+
+    g.append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("y", 0 - margin)
+        .attr("x", 0 - (height / 2))
+        .attr("dy", "3em")
+        .style("text-anchor", "middle")
+        .text("Automaker");
+}
+
 // annotations
 function addScene1Annotations(data, xScale, yScale) {
     let toyotaData;
@@ -441,7 +546,7 @@ function addScene1Annotations(data, xScale, yScale) {
     }
 }
 
-// Initialize when page loads
+// init page
 document.addEventListener('DOMContentLoaded', function() {
     init();
 });
